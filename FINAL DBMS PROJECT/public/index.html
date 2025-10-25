@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSUET TureSky Weather App & Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            crossorigin=""></script>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <header>
+        <nav class="main-nav">
+            <div class="site-title">SSUET TrueSky🌧️</div>
+            <ul class="nav-links">
+                <li><a href="#" data-section="home-section" class="active">Home</a></li>
+                <li><a href="#" data-section="dashboard-section">Dashboard</a></li>
+                <li><a href="#" data-section="newsletter-section">Newsletter</a></li>
+                <li><a href="#" data-section="blogs-section">Blogs</a></li>
+                <li><a href="#" data-section="weather-events-section">Weather Events</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button id="admin-login-toggle" class="nav-button">Admin Login</button>
+                <label for="theme-toggle" class="theme-label">Theme:</label>
+                <select id="theme-toggle">
+                    <option value="dark">THEME 1</option>
+                    <option value="light">THEME 2</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-content">
+            <h4 id="modal-title"></h4>
+            <p id="modal-message"></p>
+            <div class="modal-buttons">
+                <button class="modal-confirm-btn" id="modal-confirm-btn">OK</button>
+                <button class="modal-cancel-btn" id="modal-cancel-btn" style="display: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="admin-login-modal">
+        <div class="modal-content">
+            <h4 id="login-modal-title">Admin Login</h4>
+            <p id="login-modal-message">Enter your admin credentials.</p>
+            <form id="admin-login-form" class="login-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="admin-username" placeholder="Username" required />
+                <input type="password" id="admin-password" placeholder="Password" required />
+                <button type="submit">Login</button>
+                <button type="button" id="login-cancel-btn" class="modal-buttons modal-cancel-btn" style="background: rgba(108, 117, 125, 0.3); border-color: rgba(108, 117, 125, 0.2);">Cancel</button>
+            </form>
+            <p id="login-status" style="color: var(--error-color); margin-top: 10px;"></p>
+        </div>
+    </div>
+
+
+    <main id="main-content-area">
+        <section id="home-section" class="content-section active">
+            <div class="header-section">
+                <div class="app-title">PAKISTAN WEATHER UPDATES</div>
+                
+                <div class="city-buttons-container" id="dynamic-city-buttons">
+                    
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="main-weather-section">
+                    <div id="weather-result" class="card">
+                        <p style="text-align: center; color: var(--text-secondary);">Click a city button above to see live conditions.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Today's Forecast (Conceptual Hourly)</div>
+                        <div class="hourly-forecast-grid">
+                            <div class="hourly-item">
+                                <div class="time">6:00 AM</div>
+                                <i class="fas fa-sun icon" style="color: #FFD700;"></i>
+                                <div class="temp">25°</div>
+                            </div>
+                            <div class="hourly-item">
+                                <div class="time">9:00 AM</div>
+                                <i class="fas fa-cloud-sun icon" style="color: #ADD8E6;"></i>
+                                <div class="temp">28°</div>
+                            </div>
+                            <div class="hourly-item">
+                                <div class="time">12:00 PM</div>
+                                <i class="fas fa-cloud icon" style="color: #B0C4DE;"></i>
+                                <div class="temp">30°</div>
+                            </div>
+                            <div class="hourly-item">
+                                <div class="time">3:00 PM</div>
+                                <i class="fas fa-cloud-showers-heavy icon" style="color: #6A5ACD;"></i>
+                                <div class="temp">27°</div>
+                            </div>
+                            <div class="hourly-item">
+                                <div class="time">6:00 PM</div>
+                                <i class="fas fa-moon icon" style="color: #E0FFFF;"></i>
+                                <div class="temp">24°</div>
+                            </div>
+                            <div class="hourly-item">
+                                <div class="time">9:00 PM</div>
+                                <i class="fas fa-moon icon" style="color: #E0FFFF;"></i>
+                                <div class="temp">20°</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-container" class="card" style="height: 400px; display: none;">
+                        <div class="card-header">City Location</div>
+                        <div id="map" style="width: 100%; height: calc(100% - 30px); border-radius: 10px;"></div>
+                    </div>
+                </div>
+
+                <div class="right-sidebar-section">
+                    <div class="card">
+                        <div class="card-header">Air Conditions</div>
+                        <div class="air-conditions-grid" id="air-conditions-result">
+                            <p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1;">Details will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="about-ssuet-section">
+                <h2>Pakistan's Diverse Climates & Our Role</h2>
+                <div class="about-content-grid">
+                    <div class="about-item">
+                        <img src="Importance-of-Monsoon-Season-In-Pakistan.jpg" alt="Monsoon in Pakistan" onerror="this.onerror=null; this.src='https://placehold.co/400x200/5a7d9d/FFFFFF?text=Monsoon+Season';" />
+                        <h3>Monsoon Season & Flooding</h3>
+                        <p>Pakistan experiences a distinct monsoon season, particularly from July to September, bringing heavy rainfall that can lead to severe flooding, especially in urban and low-lying areas. Our app provides timely alerts and historical data to help communities prepare.</p>
+                    </div>
+                    <div class="about-item">
+                        <img src="6277786eb49ca.jpg" alt="Heatwaves in Karachi" onerror="this.onerror=null; this.src='https://placehold.co/400x200/9d5a5a/FFFFFF?text=Extreme+Heat';" />
+                        <h3>Heatwaves & Public Health</h3>
+                        <p>Cities like Karachi often face intense heatwaves during summer months. SSUET Weather aims to provide crucial temperature forecasts and heat index information, helping residents and authorities take necessary precautions to safeguard public health.</p>
+                    </div>
+                    <div class="about-item">
+                        <img src="Rida-Anwar..jpg" alt="Climate Research" onerror="this.onerror=null; this.src='https://placehold.co/400x200/5a9d7d/FFFFFF?text=Climate+Studies';" />
+                        <h3>Climate Change Impact</h3>
+                        <p>With global climate change, Pakistan faces increasing weather variability, including prolonged droughts and intensified extreme weather events. SSUET's research initiatives, supported by this app's data, contribute to understanding and mitigating these impacts.</p>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+        <section id="dashboard-section" class="content-section">
+            <div class="admin-dashboard-section">
+
+
+                <h3 class="admin-only">Add New Admin User</h3>
+                <form id="add-admin-form" class="admin-only" style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 25px auto;">
+                    <input type="text" id="new-admin-username" placeholder="New Admin Username" required />
+                    <input type="password" id="new-admin-password" placeholder="New Admin Password" required />
+                    <input type="password" id="confirm-admin-password" placeholder="Confirm Password" required />
+                    <button type="submit">Add Admin</button>
+                    <p id="add-admin-status" style="color: var(--error-color); margin-top: 10px;"></p>
+                </form>
+
+                <h1>DASHBOARD Weather Records</h1>
+
+                <h3 class="admin-only">Add / Update Weather Record</h3>
+                <form id="weather-form" class="admin-only">
+                    <input type="hidden" id="record-id" />
+                    <select id="city" required>
+                        <option value="">Select City</option>
+                    </select>
+                    <input type="text" id="country" placeholder="Country (Default: Pakistan)" />
+                    <input type="number" step="0.1" id="temp" placeholder="Temp (°C)" required />
+                    <input type="number" id="humidity" placeholder="Humidity (%)" />
+                    <input type="datetime-local" id="recorded_at" required />
+                    <button type="submit">Save Record</button>
+                    <button type="button" id="reset-btn">Reset Form</button>
+                </form>
+
+                <div class="admin-only admin-generate-buttons-container">
+                    <button id="generate-data-btn" style="background: rgba(40, 167, 69, 0.3); border-color: rgba(40, 167, 69, 0.2);">Generate 500 Past Records</button>
+                    <button id="delete-all-records-btn" style="background: rgba(220, 53, 69, 0.3); border-color: rgba(220, 53, 69, 0.2);">Delete All Records</button>
+                    <p id="generation-status" style="color: var(--text-secondary); margin-top: 10px; width: 100%;"></p>
+                </div>
+
+                
+
+
+                <div id="loading-indicator" class="card">Loading records...</div>
+
+                <h3>City-Specific Statistics</h3>
+                <div class="card">
+                    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                        <label for="city-stats-select" style="color: var(--text-primary); align-self: center;">Select City:</label>
+                        <select id="city-stats-select" style="flex-grow: 0; width: 150px;">
+                            <option value="">-- Select City --</option>
+                            <option value="Karachi">Karachi</option>
+                            <option value="Lahore">Lahore</option>
+                            <option value="Islamabad">Islamabad</option>
+                            <option value="Peshawar">Peshawar</option>
+                            <option value="Quetta">Quetta</option>
+                        </select>
+                    </div>
+                    <div class="dynamic-stats-box" id="city-aggregate-stats-display">
+                        <p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1;">Select a city to see statistics.</p>
+                    </div>
+                </div>
+                <h3>Temperature Trend by City</h3>
+                <div class="card">
+                    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                        <label for="graph-city-select" style="color: var(--text-primary); align-self: center;">Select City for Graph:</label>
+                        <select id="graph-city-select" style="flex-grow: 0; width: 150px;">
+                            <option value="">All Cities</option>
+                            <option value="Karachi">Karachi</option>
+                            <option value="Lahore">Lahore</option>
+                            <option value="Islamabad">Islamabad</option>
+                            <option value="Peshawar">Peshawar</option>
+                            <option value="Quetta">Quetta</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temperatureLineChart"></canvas>
+                    </div>
+                </div>
+
+                <h3>Saved Weather Records</h3>
+                <div class="filter-form">
+                    <input type="text" id="filter-city" placeholder="Filter by City" />
+                    <input type="date" id="filter-from-date" title="From Date" />
+                    <input type="date" id="filter-to-date" title="To Date" />
+                    <button id="apply-filter-btn">Apply Filter</button>
+                    <button id="clear-filter-btn">Clear Filters</button>
+                </div>
+                <table id="records-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>City</th><th>Country</th><th>Temp</th><th>Humidity</th><th>Recorded At</th><th class="admin-only">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="newsletter-section" class="content-section">
+            <div class="card" style="max-width: 600px;">
+                <div class="card-header">Newsletter Sign-up</div>
+                <p style="color:#a31414; margin-bottom: 20px; text-align: center;">Stay updated with the latest weather news, alerts, and insights directly in your inbox!</p>
+                <form id="newsletter-form" class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your Email Address" required style="width: 100%; margin-bottom: 15px;" />
+                    <button type="submit">Subscribe Now</button>
+                </form>
+                <p id="newsletter-status" style="color: var(--text-secondary); margin-top: 15px; text-align: center;"></p>
+            </div>
+        </section>
+
+        <section id="blogs-section" class="content-section">
+            <div class="card" style="max-width: 900px;">
+                <div class="card-header">Our Latest Blog Posts</div>
+                <div class="blog-post-list" style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                    <div class="blog-post-item card" style="margin-bottom: 0; padding: 25px;">
+                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--text-primary); font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">Understanding Monsoon Patterns in Pakistan</h4>
+                        <p class="blog-date" style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;"><i class="far fa-calendar-alt"></i> June 5, 2025</p>
+                        <p style="color: var(--text-primary); font-size: 0.95rem; line-height: 1.5;">An in-depth look into the science behind monsoon seasons in Pakistan, predicting their impact and how to prepare...</p>
+                        <a href="#" class="read-more" style="color: var(--text-primary); text-decoration: none; font-weight: 600; transition: color 0.3s ease;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="blog-post-item card" style="margin-bottom: 0; padding: 25px;">
+                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--text-primary); font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">The Impact of Climate Change on Karachi's Weather</h4>
+                        <p class="blog-date" style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;"><i class="far fa-calendar-alt"></i> May 28, 2025</p>
+                        <p style="color: var(--text-primary); font-size: 0.95rem; line-height: 1.5;">Exploring the long-term effects of global warming on urban weather conditions and what measures can be taken...</p>
+                        <a href="#" class="read-more" style="color: var(--text-primary); text-decoration: none; font-weight: 600; transition: color 0.3s ease;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="blog-post-item card" style="margin-bottom: 0; padding: 25px;">
+                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--text-primary); font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">Forecasting Technologies: AI in Weather Prediction</h4>
+                        <p class="blog-date" style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;"><i class="far fa-calendar-alt"></i> May 20, 2025</p>
+                        <p style="color: var(--text-primary); font-size: 0.95rem; line-height: 1.5;">How artificial intelligence is revolutionizing the accuracy and speed of weather forecasting worldwide...</p>
+                        <a href="#" class="read-more" style="color: var(--text-primary); text-decoration: none; font-weight: 600; transition: color 0.3s ease;">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="weather-events-section" class="content-section">
+            <div class="card" style="max-width: 800px;">
+                <div class="card-header">Upcoming Weather Events in Karachi</div>
+                <ul class="event-list" style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 15px; font-size: 1.1em; color: var(--text-primary);"><i class="fas fa-exclamation-triangle" style="color: #FFD700; margin-right: 10px;"></i> June 15, 2025: Expected Heatwave Alert - Prepare for extreme temperatures and take precautions.</li>
+                    <li style="margin-bottom: 15px; font-size: 1.1em; color: var(--text-primary);"><i class="fas fa-cloud-showers-heavy" style="color: #ADD8E6; margin-right: 10px;"></i> July 1, 2025: Early Monsoon Showers - Light to moderate rainfall expected, potential for localized flooding.</li>
+                    <li style="margin-bottom: 15px; font-size: 1.1em; color: var(--text-primary);"><i class="fas fa-wind" style="color: #B0C4DE; margin-right: 10px;"></i> August 10, 2025: Strong Coastal Winds Anticipated - Caution advised for maritime activities and light structures.</li>
+                    <li style="margin-bottom: 15px; font-size: 1.1em; color: var(--text-primary);"><i class="fas fa-umbrella" style="color: #6A5ACD; margin-right: 10px;"></i> September 5, 2025: Post-Monsoon Drizzle - Scattered light rains, pleasant weather.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>TrueSky🌧️ HQ</h3>
+                <p>office no.3,street 4 y</p>
+                <p>Main University Road,</p>
+                <p>Karachi, 75300, Pakistan</p>
+            </div>
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul>
+                    <li><i class="fas fa-cloud-sun"></i> Live Weather Updates</li>
+                    <li><i class="fas fa-chart-line"></i> Historical Data Analytics</li>
+                    <li><i class="fas fa-bell"></i> Weather Event Alerts</li>
+                    <li><i class="fas fa-newspaper"></i> Research & Blog</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Location Tracking</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-phone-alt"></i> +92 21 34988000</p>
+                <p><i class="fas fa-envelope"></i> info@TrueSky.pk</p>
+                <p><i class="fas fa-globe"></i> <a href="https://www.ssuet.edu.pk" target="_blank" style="color: var(--text-secondary); text-decoration: none;">www.ssuet.edu.pk</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 TrueSky🌧️. All rights reserved. | <a href="#" style="color: var(--text-secondary); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script> <!-- Link to external JavaScript file -->
+</body>
+</html>
