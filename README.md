@@ -1,4 +1,5 @@
 # 🌤️ SSUET Weather App 
+[🌤️ Live SSUET Weather App](https://azanamir272.github.io/SSUET-WEATHER-APP-/)
 
 > A responsive full-stack weather web app with map integration, dashboard, blog, events, and newsletter system.
 > Built using **HTML, CSS, JavaScript, Node.js (Express), and SQL Server**.
