@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
 });
 
 const dbConfig = {
-    user: 'sa',
-    password: 'azan12345678', 
+    user: '',
+    password: '', 
     server: 'local host', 
     database: 'WeatherzDB',
     options: {
@@ -334,13 +334,13 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
         let transporter = nodemailer.createTransport({
             service: 'gmail', 
             auth: {
-                user: 'ssuettruesky@gmail.com', 
-                pass: 'cjgyhqxdebhfkaeu' 
+                user: '', 
+                pass: '' 
             }
         });
 
         let mailOptions = {
-            from: 'ssuettruesky@gmail.com', 
+            from: '', 
             to: email, 
             subject: 'Welcome to TrueSky Newsletter!', 
             html: `
